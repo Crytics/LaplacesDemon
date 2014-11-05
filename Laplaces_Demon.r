@@ -59,12 +59,6 @@ parm=parm)
 return(Modelout)
 }
 
-#Parameter Settings
-LP <- LL + sum(beta.prior) + sigma.prior
-Modelout <- list(LP=LP, Dev=-2*LL, Monitor=c(LP,sigma),
-yhat=mu, parm=parm)
-return(Modelout)
-
 #Initiate setting
 Initial.Values <- c(rep(0,J), log(1))
 set.seed(666)
@@ -76,16 +70,27 @@ Algorithm="AMWG", Specs=list(Periodicity=10))
 
 #Demonic Suggestion
 str(Fit)
-Fit$Acceptance.Rate
 Fit
-Fit$Posterior2
 Consort(Fit)
 
-BurnIn <- Fit$Rec.BurnIn.Thinned
-plot(Fit, BurnIn, MyData, PDF=FALSE, Parms=Fit$Parameters)
-caterpillar.plot(Fit, Parms=1:10)
+#Appeasing the Demon
+Initial.Values <- as.initial.values(Fit)
+Fit <- LaplacesDemon(Model, Data=MyData, Initial.Values,
+     Covar=NULL, Iterations=60000, Status=244, Thinning=60,
+     Algorithm="CHARM", Specs=NULL)
+Consort(Fit)
+
+#Appeasing the Demon Twice
+Initial.Values <- as.initial.values(Fit)
+Fit <- LaplacesDemon(Model, Data=MyData, Initial.Values,
+     Covar=NULL, Iterations=420000, Status=62500, Thinning=420,
+     Algorithm="CHARM", Specs=list(alpha.star=0.44))
+Consort(Fit)
 
 #Visions of the Demon
+BurnIn <- Fit$Rec.BurnIn.Thinned
+plot(Fit, BurnIn, MyData, PDF=FALSE, Params=Fit$Parameters)
+caterpillar.plot(Fit, Parms=1:10)
 Pred <- predict(Fit, Model, MyData)
 summary(Pred, Discrep="Chi-Square")
 plot(Pred, Style="Density", Rows=1:9)
