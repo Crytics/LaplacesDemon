@@ -7,6 +7,7 @@
 # Updated at  : xx/xx/xxxx
 # Description : Standalone Bayesian Environment
 ###############################################
+#Source: LaplacesDemon User Guide
 
 #Clear Envisubronment
 #rm(list = ls(all = TRUE))
